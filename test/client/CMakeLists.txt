@@ -1,5 +1,5 @@
 #
-# IdLib File System
+# IdLib Network
 # Copyright (C) 2018-2024 Michael Heilmann. All rights reserved.
 #
 # This software is provided 'as-is', without any express or implied
@@ -23,7 +23,7 @@ cmake_minimum_required(VERSION 3.20)
 
 include(${idlib-process.source-dir}/cmake/all.cmake)
 
-set(name idlib-file-system-test-set-file-contents)
+set(name IdLib.Network.DemoClient)
 begin_executable()
 
 if (${${name}.compiler_c} STREQUAL ${${name}.compiler_c_msvc})
@@ -69,15 +69,11 @@ source_group(TREE ${CMAKE_CURRENT_BINARY_DIR} FILES ${${name}.configuration_file
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${${name}.header_files})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${${name}.source_files})
 
-target_link_libraries(${name} PRIVATE idlib-file-system idlib-file-system-test-mock)
+target_link_libraries(${name} PRIVATE IdLib.Network)
 
 if (${${name}.compiler_c} STREQUAL ${${name}.compiler_c_msvc})
   set_property(TARGET ${name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${name}>")
 endif()
-
-add_test(NAME ${name}
-         WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>
-         COMMAND ${name})
 
 # Copy the assets to the current binary directory.
 file(GLOB_RECURSE files_to_copy RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.*" )

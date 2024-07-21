@@ -30,24 +30,5 @@ main
     int argc,
     char** argv
   )
-{
-  if (IdLib_Network_startup()) {
-    return EXIT_FAILURE;
-  }
-  IdLib_Network_Socket* socket = NULL;
-  if (IdLib_Network_Socket_create(&socket, "google.com", "http")) {
-    IdLib_Network_shutdown();
-    return EXIT_FAILURE;
-  }
-  if (IdLib_Network_Socket_httpGetRequest(socket)) {
-    IdLib_Network_Socket_destroy(socket);
-    socket = NULL;
-    IdLib_Network_shutdown();
-    return EXIT_FAILURE;
-  }
-  IdLib_Network_Socket_destroy(socket);
-  socket = NULL;
-  IdLib_Network_shutdown();
-  return EXIT_SUCCESS;
-}
+{ return EXIT_SUCCESS; }
 

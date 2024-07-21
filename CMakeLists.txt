@@ -29,7 +29,7 @@ include(FetchContent)
 
 set(idlib-process.repository CACHE STRING "IdLib Process: The Git repository to check out")
 if (NOT idlib-process.repository)
-  set(idlib-process.repository https://github.com/michaelheilmann/idlib-process.git)
+  set(idlib-process.repository https://github.com/shizu-org/idlib-process.git)
 endif()
 
 set(idlib-process.tag CACHE STRING "IdLib Process: The Git tag to check out")
@@ -61,3 +61,4 @@ add_subdirectory(library)
 
 enable_testing()
 add_subdirectory(test/client)
+add_subdirectory(test/server)
