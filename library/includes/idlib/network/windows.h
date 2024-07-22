@@ -15,21 +15,37 @@
 
 #include <stdio.h>
 
-static inline SOCKET wsa_socket(int af, int type, int protocol) {
-  return socket(af, type, protocol);
-}
+static inline SOCKET
+wsa_socket
+  (
+    int af,
+    int type,
+    int protocol
+  )
+{ return socket(af, type, protocol); }
 
-static inline int wsa_connect(SOCKET s, const struct sockaddr* name, int namelen) {
-  return connect(s, name, namelen);
-}
+static inline int
+wsa_connect
+  (
+    SOCKET s,
+    const struct sockaddr* name,
+    int namelen
+  )
+{ return connect(s, name, namelen); }
 
-static inline int wsa_shutdown(SOCKET s) {
-  return shutdown(s, SD_SEND);
-}
+static inline int
+wsa_shutdown
+  (
+    SOCKET s
+  )
+{ return shutdown(s, SD_SEND); }
 
-static inline int wsa_closesocket(SOCKET s) {
-  return closesocket(s);
-}
+static inline int
+wsa_closesocket
+  (
+    SOCKET s
+  )
+{ return closesocket(s); }
 
 #endif
 

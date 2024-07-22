@@ -45,6 +45,12 @@ main
     IdLib_Network_shutdown();
     return EXIT_FAILURE;
   }
+  if (IdLib_Network_Socket_httpGetResponse(socket)) {
+    IdLib_Network_Socket_destroy(socket);
+    socket = NULL;
+    IdLib_Network_shutdown();
+    return EXIT_FAILURE;
+  }
   IdLib_Network_Socket_destroy(socket);
   socket = NULL;
   IdLib_Network_shutdown();

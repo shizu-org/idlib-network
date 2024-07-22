@@ -21,7 +21,7 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-project(idlib-network LANGUAGES C)
+project(IdLib.Network LANGUAGES C)
 
 include(FetchContent)
 

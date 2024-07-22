@@ -270,12 +270,85 @@ IdLib_Network_Socket_destroy
   if (!socket) {
     return IDLIB_ARGUMENT_INVALID;
   }
+
+  if (INVALID_SOCKET != socket->socket) {
+    wsa_closesocket(socket->socket);
+    socket->socket = INVALID_SOCKET;
+  }
+
   free(socket->service);
   socket->service = NULL;
   free(socket->node);
   socket->node = NULL;
   free(socket);
   socket = NULL;
+  return IDLIB_SUCCESS;
+}
+
+typedef struct Buffer {
+  char* p;
+  size_t n;
+} Buffer;
+
+idlib_status Buffer_append(Buffer* buffer, char const* p, size_t n) {
+  char* q = realloc(buffer->p, buffer->n + n);
+  if (!q) {
+    return IDLIB_ALLOCATION_FAILED;
+  }
+  buffer->p = q;
+  memcpy(buffer->p + buffer->n, p, n);
+  buffer->n = buffer->n + n;
+  return IDLIB_SUCCESS;
+}
+
+idlib_status Buffer_destroy(Buffer* buffer) {
+  if (buffer->p) {
+    free(buffer->p);
+    buffer->p = NULL;
+  }
+  return IDLIB_SUCCESS;
+}
+
+static idlib_status
+IdLib_Network_Socket_read
+  (
+    IdLib_Network_Socket* socket,
+    char** bytes,
+    size_t* numberOfBytes
+  )
+{
+#define READ_BUFFER_SIZE 8
+  Buffer buffer = {
+    .p = NULL,
+    .n = 0
+  };
+  for (;;) {
+    char temporaryBuffer[READ_BUFFER_SIZE];
+    int result = recv(socket->socket, temporaryBuffer, sizeof(temporaryBuffer), 0);
+    if (SOCKET_ERROR == result) {
+      int lastError = WSAGetLastError();
+      if (WSAEMSGSIZE == lastError) {
+        idlib_status s = Buffer_append(&buffer, temporaryBuffer, sizeof(temporaryBuffer));
+        if (s) {
+          Buffer_destroy(&buffer);
+          return s;
+        }
+      } else {
+        Buffer_destroy(&buffer);
+        return IDLIB_ENVIRONMENT_FAILED;
+      }
+    } else if (0 == result) {
+      break;
+    } else {
+      idlib_status s = Buffer_append(&buffer, temporaryBuffer, result);
+      if (s) {
+        Buffer_destroy(&buffer);
+        return s;
+      }
+    }
+  }
+  *bytes = buffer.p;
+  *numberOfBytes = buffer.n;
   return IDLIB_SUCCESS;
 }
 
@@ -341,11 +414,14 @@ IdLib_Network_Socket_httpGetRequest
   }
 
   const char* request =
-    "GET / HTTP/1.1\n"
-    "Host: google.com\n"
-    "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36\n"
-    "\n"
+    "GET / HTTP/1.1\r\n"
+    "Host: google.com\r\n"
+    "User-Agent: curl/8.8.0\r\n"
+    "\r\n"
     ;
+
+  fprintf(stdout, "REQUEST:\n");
+  fwrite(request, 1, strlen(request), stdout);
 
   idlib_status status = IdLib_Network_Socket_write(socket, request, strlen(request));
   if (status) {
@@ -357,9 +433,24 @@ IdLib_Network_Socket_httpGetRequest
     return status;
   }
   wsa_shutdown(socket->socket);
-  wsa_closesocket(socket->socket);
-  socket->socket = INVALID_SOCKET;
   freeaddrinfo(addresses);
   addresses = NULL;
+  return IDLIB_SUCCESS;
+}
+
+idlib_status
+IdLib_Network_Socket_httpGetResponse
+  (
+    IdLib_Network_Socket* socket
+  ) 
+{
+  char* bytes; size_t numberOfBytes;
+  idlib_status s = IdLib_Network_Socket_read(socket, &bytes, &numberOfBytes);
+  if (s) {
+    return s;
+  }
+  fprintf(stdout, "RESPONSE:\n");
+  fwrite(bytes, 1, numberOfBytes, stdout);
+  free(bytes);
   return IDLIB_SUCCESS;
 }

@@ -115,4 +115,10 @@ IdLib_Network_Socket_httpGetRequest
     IdLib_Network_Socket* socket
   );
 
+idlib_status
+IdLib_Network_Socket_httpGetResponse
+  (
+    IdLib_Network_Socket* socket
+  );
+
 #endif // IDLIB_NETWORK_H_INCLUDED
